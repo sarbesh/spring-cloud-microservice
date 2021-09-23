@@ -1,4 +1,4 @@
-package com.sarbesh.webapp;
+package com.sarbesh.gatewayservice;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
