@@ -1,11 +1,9 @@
-[submodule "ConfigServer"]
-    uri = https://github.com/sarbesh/ConfigServer.git
-    branch = master
-
-[submodule "ConfigRepo"]
-    uri = https://github.com/sarbesh/ConfigRepo.git
-    branch = master
-
 [submodule "EurekaServer"]
-    uri = https://github.com/sarbesh/EurekaServer.git
-    branch = master
+	path = EurekaServer
+	url = https://github.com/sarbesh/EurekaServer.git
+[submodule "ConfigRepo"]
+	path = ConfigRepo
+	url = https://github.com/sarbesh/ConfigRepo.git
+[submodule "ConfigServer"]
+	path = ConfigServer
+	url = https://github.com/sarbesh/ConfigServer.git
