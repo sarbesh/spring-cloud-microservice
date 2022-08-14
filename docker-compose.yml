@@ -1,0 +1,95 @@
+version: "3.9"
+services:
+  config:
+    container_name: config-server
+    image: openjdk:8-jdk-alpine
+    ports:
+      - "8888:8888"
+    expose:
+      - 8888
+    working_dir: "/app"
+    volumes:
+      - "./ConfigServer/target:/app"
+      - "./../ConfigRepo:/config_files"
+    environment:
+      - CONFIG_REPO_URL=/config_files
+      - EUREKA_URL=http://user:password@eureka:8761
+      - CONFIG_SERVER_PASSWORD=password
+      - ENCRYPT_KEY=password
+      - HOST_NAME=config
+      - PORT=8888
+#    command: ["mvn", "spring-boot:run"]
+    command: ["java", "-jar", "configserver-0.0.1-SNAPSHOT.jar"]
+    healthcheck:
+      test: "CMD curl --fail http://user:password@localhost:8888/actuator/health || exit 1"
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: "512MB"
+  eureka:
+    container_name: eureka-server
+    image: openjdk:8-jdk-alpine
+    ports:
+      - "8761:8761"
+    expose:
+      - 8761
+    working_dir: "/app"
+    volumes:
+      - "./EurekaServer/target:/app"
+    environment:
+      - CONFIG_SERVER_URL=http://user:password@config:8888
+      - HOST_NAME=eureka
+      - EUREKA_USER_PASSWORD=password
+      - PORT=8761
+    command: ["java", "-jar", "eurekaserver-0.0.1-SNAPSHOT.jar"]
+    depends_on:
+      config:
+        condition: service_healthy
+    healthcheck:
+      test: curl --fail http://user:password@localhost:8761/actuator/health || exit 1
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: "512MB"
+  gateway:
+    container_name: API-gateway
+    image: openjdk:8-jdk-alpine
+    ports:
+      - "8080:8080"
+    working_dir: "/app"
+    volumes:
+      - "./GatewayService/target:/app"
+    environment:
+      - CONFIG_SERVER_URL=http://user:password@config:8888
+      - HOST_NAME=gateway
+      - PORT=8080
+    command: ["java", "-jar", "GatewayService-0.0.1-SNAPSHOT.jar"]
+    depends_on:
+      config:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
+    healthcheck:
+      test: curl --fail http://user:password@localhost:8080/actuator/health || exit 1
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: "512MB"
