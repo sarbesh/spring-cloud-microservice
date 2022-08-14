@@ -14,3 +14,7 @@
 	path = GatewayService
 	url = https://github.com/sarbesh/GatewayService.git
 	branch = master
+[submodule "LoginService"]
+	path = LoginService
+	url = https://github.com/sarbesh/LoginService.git
+	branch = master
