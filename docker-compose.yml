@@ -2,7 +2,7 @@ version: "3.9"
 services:
   config:
     container_name: config-server
-    image: openjdk:8-jdk-alpine
+    image: openjdk:8-jdk
     ports:
       - "8888:8888"
     expose:
@@ -21,20 +21,21 @@ services:
 #    command: ["mvn", "spring-boot:run"]
     command: ["java", "-jar", "configserver-0.0.1-SNAPSHOT.jar"]
     healthcheck:
-      test: "CMD curl --fail http://user:password@localhost:8888/actuator/health || exit 1"
+#      test: ["CMD", "curl", "--fail", "http://user:password@localhost:8888/actuator/health", "||", "exit", "1"]
+      test: curl --fail http://user:password@config:8888/actuator/health || exit 1
       interval: 30s
       timeout: 30s
       retries: 5
       start_period: 30s
     deploy:
       replicas: 1
-      resources:
-        limits:
-          cpus: "0.2"
-          memory: "512MB"
+#      resources:
+#        limits:
+#          cpus: "0.2"
+#          memory: "512MB"
   eureka:
     container_name: eureka-server
-    image: openjdk:8-jdk-alpine
+    image: openjdk:8-jdk
     ports:
       - "8761:8761"
     expose:
@@ -52,20 +53,20 @@ services:
       config:
         condition: service_healthy
     healthcheck:
-      test: curl --fail http://user:password@localhost:8761/actuator/health || exit 1
+      test: curl --fail http://user:password@eureka:8761/actuator/health || exit 1
       interval: 30s
       timeout: 30s
       retries: 5
-      start_period: 30s
+      start_period: 60s
     deploy:
       replicas: 1
-      resources:
-        limits:
-          cpus: "0.2"
-          memory: "512MB"
+#      resources:
+#        limits:
+#          cpus: "0.2"
+#          memory: "512MB"
   gateway:
     container_name: API-gateway
-    image: openjdk:8-jdk-alpine
+    image: openjdk:8-jdk
     ports:
       - "8080:8080"
     working_dir: "/app"
@@ -82,14 +83,14 @@ services:
       eureka:
         condition: service_healthy
     healthcheck:
-      test: curl --fail http://user:password@localhost:8080/actuator/health || exit 1
+      test: curl --fail http://user:password@gateway:8080/actuator/health || exit 1
       interval: 30s
       timeout: 30s
       retries: 5
-      start_period: 30s
+      start_period: 60s
     deploy:
       replicas: 1
-      resources:
-        limits:
-          cpus: "0.2"
-          memory: "512MB"
+#      resources:
+#        limits:
+#          cpus: "0.2"
+#          memory: "512MB"
