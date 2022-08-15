@@ -1,6 +1,6 @@
 version: "3.9"
 services:
-  config:
+  config-server:
     container_name: config-server
     image: openjdk:8-jdk
     ports:
@@ -13,16 +13,16 @@ services:
       - "./../ConfigRepo:/config_files"
     environment:
       - CONFIG_REPO_URL=/config_files
-      - EUREKA_URL=http://user:password@eureka:8761
+      - EUREKA_URL=http://user:password@eureka-server:8761
       - CONFIG_SERVER_PASSWORD=password
       - ENCRYPT_KEY=password
-      - HOST_NAME=config
+      - HOST_NAME=config-server
       - PORT=8888
 #    command: ["mvn", "spring-boot:run"]
     command: ["java", "-jar", "configserver-0.0.1-SNAPSHOT.jar"]
     healthcheck:
 #      test: ["CMD", "curl", "--fail", "http://user:password@localhost:8888/actuator/health", "||", "exit", "1"]
-      test: curl --fail http://user:password@config:8888/actuator/health || exit 1
+      test: curl -f http://user:password@config-server:8888/actuator/health
       interval: 30s
       timeout: 30s
       retries: 5
@@ -33,7 +33,7 @@ services:
 #        limits:
 #          cpus: "0.2"
 #          memory: "512MB"
-  eureka:
+  eureka-server:
     container_name: eureka-server
     image: openjdk:8-jdk
     ports:
@@ -44,16 +44,16 @@ services:
     volumes:
       - "./EurekaServer/target:/app"
     environment:
-      - CONFIG_SERVER_URL=http://user:password@config:8888
-      - HOST_NAME=eureka
+      - CONFIG_SERVER_URL=http://user:password@config-server:8888
+      - HOST_NAME=eureka-server
       - EUREKA_USER_PASSWORD=password
       - PORT=8761
     command: ["java", "-jar", "eurekaserver-0.0.1-SNAPSHOT.jar"]
     depends_on:
-      config:
+      config-server:
         condition: service_healthy
     healthcheck:
-      test: curl --fail http://user:password@eureka:8761/actuator/health || exit 1
+      test: curl -f http://user:password@eureka-server:8761/actuator/health || exit 1
       interval: 30s
       timeout: 30s
       retries: 5
@@ -64,8 +64,8 @@ services:
 #        limits:
 #          cpus: "0.2"
 #          memory: "512MB"
-  gateway:
-    container_name: API-gateway
+  api-gateway:
+    container_name: api-gateway
     image: openjdk:8-jdk
     ports:
       - "8080:8080"
@@ -73,17 +73,17 @@ services:
     volumes:
       - "./GatewayService/target:/app"
     environment:
-      - CONFIG_SERVER_URL=http://user:password@config:8888
-      - HOST_NAME=gateway
+      - CONFIG_SERVER_URL=http://user:password@config-server:8888
+      - HOST_NAME=api-gateway
       - PORT=8080
     command: ["java", "-jar", "GatewayService-0.0.1-SNAPSHOT.jar"]
     depends_on:
-      config:
+      config-server:
         condition: service_healthy
-      eureka:
+      eureka-server:
         condition: service_healthy
     healthcheck:
-      test: curl --fail http://user:password@gateway:8080/actuator/health || exit 1
+      test: curl - http://user:password@api-gateway:8080/actuator/health || exit 1
       interval: 30s
       timeout: 30s
       retries: 5
