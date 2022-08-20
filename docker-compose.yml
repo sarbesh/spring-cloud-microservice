@@ -27,6 +27,8 @@ services:
       - SPRING_PROFILES_ACTIVE=local
       - EUREKA_REGISTER=true
       - EUREKA_FETCH=true
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     #    command: ["mvn", "spring-boot:run"]
     command: ["java", "-jar", "configserver-0.0.1-SNAPSHOT.jar"]
     healthcheck:
@@ -102,7 +104,7 @@ services:
       eureka-server:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test: curl -f http://user:password@api-gateway:8080/actuator/health || exit 1
       interval: 30s
@@ -116,8 +118,14 @@ services:
 #          cpus: "0.2"
 #          memory: "512MB"
   redis:
+    container_name: redis
     image: redis:latest
     ports:
       - "6379:6379"
     expose:
       - 6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
