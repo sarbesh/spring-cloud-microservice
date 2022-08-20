@@ -24,7 +24,7 @@ services:
       - PORT=8888
       - CONFIG_SERVER_URL=http://user:password@config-server:8888
       - EUREKA_USER_PASSWORD=password
-      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_PROFILES_ACTIVE=local
       - EUREKA_REGISTER=false
       - EUREKA_FETCH=false
     #    command: ["mvn", "spring-boot:run"]
@@ -57,7 +57,7 @@ services:
       - HOST_NAME=eureka-server
       - EUREKA_USER_PASSWORD=password
       - PORT=8761
-      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_PROFILES_ACTIVE=local
       - EUREKA_REGISTER=false
       - EUREKA_FETCH=false
     command: ["java", "-jar", "eurekaserver-0.0.1-SNAPSHOT.jar"]
@@ -90,7 +90,7 @@ services:
       - HOST_NAME=api-gateway
       - EUREKA_USER_PASSWORD=password
       - PORT=8080
-      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_PROFILES_ACTIVE=local
       - EUREKA_REGISTER=true
       - EUREKA_FETCH=true
     command: ["java", "-jar", "GatewayService-0.0.1-SNAPSHOT.jar"]
