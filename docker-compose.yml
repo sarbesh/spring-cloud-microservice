@@ -3,6 +3,9 @@ services:
   config-server:
     container_name: config-server
     image: openjdk:8-jdk
+#    build:
+#      context: ./ConfigServer
+#      dockerfile: Dockerfile
     ports:
       - "8888:8888"
     expose:
@@ -11,18 +14,24 @@ services:
     volumes:
       - "./ConfigServer/target:/app"
       - "./../ConfigRepo:/config_files"
+      - "${HOME}/.m2:/root/.m2"
     environment:
-      - CONFIG_REPO_URL=/config_files
+      - CONFIG_REPO_URL=/config_files # https://github.com/sarbesh/ConfigRepo.git
       - EUREKA_URL=http://user:password@eureka-server:8761
       - CONFIG_SERVER_PASSWORD=password
       - ENCRYPT_KEY=password
       - HOST_NAME=config-server
       - PORT=8888
-#    command: ["mvn", "spring-boot:run"]
+      - CONFIG_SERVER_URL=http://user:password@config-server:8888
+      - EUREKA_USER_PASSWORD=password
+      - SPRING_PROFILES_ACTIVE=local
+      - EUREKA_REGISTER=true
+      - EUREKA_FETCH=true
+    #    command: ["mvn", "spring-boot:run"]
     command: ["java", "-jar", "configserver-0.0.1-SNAPSHOT.jar"]
     healthcheck:
-#      test: ["CMD", "curl", "--fail", "http://user:password@localhost:8888/actuator/health", "||", "exit", "1"]
-      test: curl -f http://user:password@config-server:8888/actuator/health
+      #      test: ["CMD", "curl", "--fail", "http://user:password@localhost:8888/actuator/health", "||", "exit", "1"]
+      test: curl -f -u user:password http://localhost:8888/actuator/health || exit 1
       interval: 30s
       timeout: 30s
       retries: 5
@@ -48,6 +57,9 @@ services:
       - HOST_NAME=eureka-server
       - EUREKA_USER_PASSWORD=password
       - PORT=8761
+      - SPRING_PROFILES_ACTIVE=local
+      - EUREKA_REGISTER=true
+      - EUREKA_FETCH=true
     command: ["java", "-jar", "eurekaserver-0.0.1-SNAPSHOT.jar"]
     depends_on:
       config-server:
@@ -74,8 +86,13 @@ services:
       - "./GatewayService/target:/app"
     environment:
       - CONFIG_SERVER_URL=http://user:password@config-server:8888
+      - EUREKA_URL=http://user:password@eureka-server:8761
       - HOST_NAME=api-gateway
+      - EUREKA_USER_PASSWORD=password
       - PORT=8080
+      - SPRING_PROFILES_ACTIVE=local
+      - EUREKA_REGISTER=true
+      - EUREKA_FETCH=true
     command: ["java", "-jar", "GatewayService-0.0.1-SNAPSHOT.jar"]
     depends_on:
       config-server:
@@ -83,7 +100,7 @@ services:
       eureka-server:
         condition: service_healthy
     healthcheck:
-      test: curl - http://user:password@api-gateway:8080/actuator/health || exit 1
+      test: curl -f http://user:password@api-gateway:8080/actuator/health || exit 1
       interval: 30s
       timeout: 30s
       retries: 5
