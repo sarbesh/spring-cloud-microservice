@@ -25,8 +25,8 @@ services:
       - CONFIG_SERVER_URL=http://user:password@config-server:8888
       - EUREKA_USER_PASSWORD=password
       - SPRING_PROFILES_ACTIVE=local
-      - EUREKA_REGISTER=false
-      - EUREKA_FETCH=false
+      - EUREKA_REGISTER=true
+      - EUREKA_FETCH=true
     #    command: ["mvn", "spring-boot:run"]
     command: ["java", "-jar", "configserver-0.0.1-SNAPSHOT.jar"]
     healthcheck:
@@ -58,8 +58,8 @@ services:
       - EUREKA_USER_PASSWORD=password
       - PORT=8761
       - SPRING_PROFILES_ACTIVE=local
-      - EUREKA_REGISTER=false
-      - EUREKA_FETCH=false
+      - EUREKA_REGISTER=true
+      - EUREKA_FETCH=true
     command: ["java", "-jar", "eurekaserver-0.0.1-SNAPSHOT.jar"]
     depends_on:
       config-server:
